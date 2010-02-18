@@ -127,7 +127,7 @@ module Savon
     # to an optional block.
     def request(type)
       request = case type
-        when :wsdl then Net::HTTP::Get.new @endpoint.to_s
+        when :wsdl then Net::HTTP::Get.new @endpoint.to_s, headers
         when :soap then Net::HTTP::Post.new @soap.endpoint.to_s, headers.merge(soap_headers)
       end
       if @basic_auth
