@@ -17,6 +17,11 @@ module Savon
     def self.raise_errors?
       @@raise_errors
     end
+    
+    # Sets a specific handler for errors to raise.
+    def self.error_handler(&blk)
+      @@error_handler = blk
+    end
 
     # Expects a Net::HTTPResponse and handles errors.
     def initialize(http)
@@ -77,11 +82,15 @@ module Savon
     # Returns the SOAP fault message in case one was found.
     def soap_fault_message_by_version(soap_fault)
       return unless soap_fault
-
-      if soap_fault.keys.include? :faultcode
-        "(#{soap_fault[:faultcode]}) #{soap_fault[:faultstring]}"
-      elsif soap_fault.keys.include? :code
-        "(#{soap_fault[:code][:value]}) #{soap_fault[:reason][:text]}"
+      
+      if @@error_handler
+        @@error_handler.call(soap_fault)
+      else
+        if soap_fault.keys.include? :faultcode
+          "(#{soap_fault[:faultcode]}) #{soap_fault[:faultstring]}"
+        elsif soap_fault.keys.include? :code
+          "(#{soap_fault[:code][:value]}) #{soap_fault[:reason][:text]}"
+        end
       end
     end
 

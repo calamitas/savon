@@ -2,8 +2,8 @@ require "rubygems"
 require "rake"
 
 Gem::Specification.new do |s|
-  s.name = "savon"
-  s.version = "0.7.2"
+  s.name = "savon-xaop"
+  s.version = "0.7.2.1"
   s.date = "2010-01-17"
 
   s.authors = "Daniel Harrington"
