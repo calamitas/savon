@@ -3,7 +3,7 @@ require "rake"
 
 Gem::Specification.new do |s|
   s.name = "savon-xaop"
-  s.version = "0.7.2.2"
+  s.version = "0.7.2.3"
   s.date = "2010-01-17"
 
   s.authors = "Daniel Harrington"
