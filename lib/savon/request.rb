@@ -77,7 +77,7 @@ module Savon
     
     # Sets the +username+ and +password+ for NTLM authentication.
     def ntlm_auth(username, password)
-      @ntlm_auth = [username, password]
+      @ntlm_auth = [username, password, true]
     end
     
     # Retrieves WSDL document and returns the Net::HTTP response.
@@ -85,14 +85,7 @@ module Savon
       log "Retrieving WSDL from: #{@endpoint}"
       http.endpoint @endpoint.host, @endpoint.port
       http.use_ssl = @endpoint.ssl?
-      # This is not yet ideal, but better at least.
-      # Actually it should be possible to select the authentication
-      # mechanism based on the returned header.
-      result = http.start { |h| h.request request(:wsdl, false) }
-      if Net::HTTPUnauthorized === result
-        result = http.start { |h| h.request request(:wsdl, true) }
-      end
-      result
+      http.start { |h| h.request request(:wsdl) }
     end
 
     # Executes a SOAP request using a given Savon::SOAP instance and
@@ -132,19 +125,17 @@ module Savon
 
     # Returns a Net::HTTP request for a given +type+. Yields the request
     # to an optional block.
-    def request(type, authenticate = true)
+    def request(type)
       request = case type
         when :wsdl then Net::HTTP::Get.new @endpoint.to_s, headers
         when :soap then Net::HTTP::Post.new @soap.endpoint.to_s, headers.merge(soap_headers)
       end
-      if authenticate
-        if @basic_auth
-          request.basic_auth *@basic_auth
-        elsif @ntlm_auth
-          log "Using NTLM authentication"
-          require 'net/ntlm_http'
-          request.ntlm_auth *@ntlm_auth
-        end
+      if @basic_auth
+        request.basic_auth *@basic_auth
+      elsif @ntlm_auth
+        log "Using NTLM authentication"
+        require 'net/ntlm_http'
+        request.ntlm_auth *@ntlm_auth
       end
       yield request if block_given?
       request
