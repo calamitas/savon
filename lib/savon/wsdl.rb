@@ -91,7 +91,7 @@ module Savon
 
       @section = tag.to_sym if @depth <= 2 && Sections.include?(tag)
       @namespace_uri ||= attrs["targetNamespace"] if @section == :definitions
-      @soap_endpoint ||= URI(attrs["location"]) if @section == :service && tag == "address"
+      @soap_endpoint ||= URI(URI.escape(attrs["location"])) if @section == :service && tag == "address"
 
       operation_from tag, attrs if @section == :binding && tag == "operation"
     end
