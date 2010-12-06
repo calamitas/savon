@@ -13,7 +13,16 @@ module Savon
   class HTTPError < StandardError; end
 
   # Raised in case of a SOAP fault.
-  class SOAPFault < StandardError; end
+  class SOAPFault < StandardError
+    
+    attr_reader :error_code
+    
+    def initialize(message, error_code)
+      super(message)
+      @error_code = error_code
+    end
+    
+  end
 
 end
 

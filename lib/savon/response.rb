@@ -35,9 +35,12 @@ module Savon
     def soap_fault?
       @soap_fault ? true : false
     end
-
+    
     # Returns the SOAP fault message.
     attr_reader :soap_fault
+    
+    # Returns the SOAP error code
+    attr_reader :soap_error_code
 
     # Returns whether there was an HTTP error.
     def http_error?
@@ -59,7 +62,7 @@ module Savon
 
     # Returns the HTTP response object.
     attr_reader :http
-	
+    
     alias :to_s :to_xml
 
   private
@@ -69,7 +72,8 @@ module Savon
     def handle_soap_fault
       if soap_fault_message
         @soap_fault = soap_fault_message
-        raise Savon::SOAPFault, @soap_fault if self.class.raise_errors?
+        @soap_error_code = Integer(((to_hash[:fault] || {})[:detail] || {})[:errorcode])
+        raise Savon::SOAPFault.new(@soap_fault, @soap_error_code) if self.class.raise_errors?
       end
     end
 
