@@ -1,6 +1,3 @@
-require "rubygems"
-require "rake"
-
 Gem::Specification.new do |s|
   s.name = "savon-xaop"
   s.version = "0.7.2.6"
@@ -11,8 +8,8 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/rubiii/savon"
   s.summary = "Heavy metal Ruby SOAP client library"
 
-  s.files = FileList["[A-Z]*", "{lib,spec}/**/*.{rb,xml}"]
-  s.test_files = FileList["spec/**/*.rb"]
+  s.files = Dir["[A-Z]*"] + Dir["{lib,spec}/**/*.{rb,xml}"]
+  s.test_files = Dir["spec/**/*.rb"]
 
   s.extra_rdoc_files = ["README.textile"]
   s.rdoc_options = ["--charset=UTF-8", "--title", "Savon", "--line-numbers", "--inline-source"]
