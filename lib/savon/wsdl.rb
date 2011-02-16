@@ -47,6 +47,7 @@ module Savon
 
     # Returns the raw WSDL document.
     def to_s
+      # TODO: this class fails completely when the URL for the WSDL redirects
       @document ||= @request.wsdl.body
     end
 

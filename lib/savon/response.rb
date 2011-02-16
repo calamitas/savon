@@ -72,7 +72,7 @@ module Savon
     def handle_soap_fault
       if soap_fault_message
         @soap_fault = soap_fault_message
-        @soap_error_code = Integer(((to_hash[:fault] || {})[:detail] || {})[:errorcode])
+        @soap_error_code = Integer(((to_hash[:fault] || {})[:detail] || {})[:errorcode] || 0)
         raise Savon::SOAPFault.new(@soap_fault, @soap_error_code) if self.class.raise_errors?
       end
     end
