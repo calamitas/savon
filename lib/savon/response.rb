@@ -104,7 +104,7 @@ module Savon
       if @http.code.to_i >= 300
         @http_error = "#{@http.message} (#{@http.code})"
         @http_error << ": #{@http.body}" unless @http.body.empty?
-        raise Savon::HTTPError, http_error if self.class.raise_errors?
+        raise Savon::HTTPError.new(http_error, @http.to_hash) if self.class.raise_errors?
       end
     end
 
