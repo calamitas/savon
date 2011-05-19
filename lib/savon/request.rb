@@ -81,11 +81,24 @@ module Savon
     end
     
     # Retrieves WSDL document and returns the Net::HTTP response.
-    def wsdl
+    def wsdl(retries = 0)
       log "Retrieving WSDL from: #{@endpoint}"
       http.endpoint @endpoint.host, @endpoint.port
       http.use_ssl = @endpoint.ssl?
-      http.start { |h| h.request request(:wsdl) }
+      response = http.start { |h| h.request request(:wsdl) }
+      case response
+      when Net::HTTPFound, Net::HTTPMovedPermanently
+        puts "REDIRECT: #{@endpoint} -> #{response["location"]}"
+        @endpoint = URI response["location"]
+        if retries == 10
+          raise Savon::HTTPError.new("Redirect too long", {})
+        end
+        wsdl(retries + 1)
+      when Net::HTTPSuccess
+        response
+      else
+        raise Savon::HTTPError.new(response.body.to_s, response.to_hash)
+      end
     end
 
     # Executes a SOAP request using a given Savon::SOAP instance and
@@ -133,7 +146,7 @@ module Savon
       if @basic_auth
         request.basic_auth *@basic_auth
       elsif @ntlm_auth
-        log "Using NTLM authentication"
+        require 'kconv'
         require 'net/ntlm_http'
         request.ntlm_auth *@ntlm_auth
       end

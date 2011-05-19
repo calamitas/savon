@@ -59,7 +59,11 @@ module Savon
         @stream = WSDLStream.new
         REXML::Document.parse_stream to_s, @stream
       end
-      @stream
+      if @stream.sections.include? :service
+        @stream
+      else
+        raise Savon::HTTPError.new("Not a WSDL", {})
+      end
     end
 
   end
@@ -74,6 +78,7 @@ module Savon
 
     def initialize
       @depth, @operations = 0, {}
+      @sections = []
     end
 
     # Returns the namespace URI.
@@ -84,13 +89,19 @@ module Savon
 
     # Returns the SOAP endpoint.
     attr_reader :soap_endpoint
+    
+    # Visited sections (used to check validaty of the WSDL)
+    attr_reader :sections
 
     # Hook method called when the stream parser encounters a starting tag.
     def tag_start(tag, attrs)
       @depth += 1
       tag = tag.strip_namespace
-
-      @section = tag.to_sym if @depth <= 2 && Sections.include?(tag)
+      
+      if @depth <= 2 && Sections.include?(tag)
+        @section = tag.to_sym
+        @sections << @section
+      end
       @namespace_uri ||= attrs["targetNamespace"] if @section == :definitions
       @soap_endpoint ||= URI(URI.escape(attrs["location"])) if @section == :service && tag == "address"
 
